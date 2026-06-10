@@ -103,19 +103,20 @@ Both backward integration (reliance on imported inputs) and forward integration 
 
 ## Regression Results
 
-Three specifications isolate the betweenness effect step by step:
+Three specifications isolate the betweenness effect step by step, plus a fourth that adds country fixed effects:
 
-| | M1: Baseline | M2: + Betweenness | M3: Full |
-|---|---|---|---|
-| In-strength (bn USD) | 0.0003 | −0.0001 | 0.0002 |
-| Out-strength (bn USD) | **0.002\*\*\*** | **0.001\*\*** | **0.002\*\*\*** |
-| **Betweenness centrality** | — | **163.7\*\*\*** | **119.4\*\*\*** |
-| Backward GVC | — | — | **0.632\*\*\*** |
-| Forward GVC | — | — | **0.288\*\*** |
-| R² | 0.015 | 0.026 | 0.044 |
-| N | 2,171 | 2,171 | 2,171 |
+| | M1: Baseline | M2: + Betweenness | M3: Full | M4: Country FE |
+|---|---|---|---|---|
+| In-strength (bn USD) | 0.0003 | −0.0001 | 0.0002 | −0.0003 |
+| Out-strength (bn USD) | **0.002\*\*\*** | **0.001\*\*** | **0.002\*\*\*** | **0.001\*\*** |
+| **Betweenness centrality** | — | **163.7\*\*\*** | **119.4\*\*\*** | **43.5\*\*\*** |
+| Backward GVC | — | — | **0.632\*\*\*** | **0.264\*\*** |
+| Forward GVC | — | — | **0.288\*\*** | 0.104 |
+| Country FE | No | No | No | Yes (43 dummies) |
+| R² | 0.015 | 0.026 | 0.044 | 0.746 |
+| N | 2,171 | 2,171 | 2,171 | 2,171 |
 
-*Heteroskedasticity-robust standard errors (HC1). \*p<0.10, \*\*p<0.05, \*\*\*p<0.01.*
+*Heteroskedasticity-robust standard errors (HC1). \*p<0.10, \*\*p<0.05, \*\*\*p<0.01. Country dummy coefficients omitted from M4 for brevity.*
 
 ### Standardised Coefficients — Full Model
 
@@ -128,6 +129,27 @@ Standardised betas confirm that **betweenness centrality has the largest and mos
 <img src="plots/07_r2_progression.png" width="580"/>
 
 Each specification adds explanatory power. The low overall R² (4.4%) is expected: 2,171 observations spanning Indonesia and Luxembourg introduce vast unobserved heterogeneity. Country and industry fixed effects are the natural extension for a panel setting.
+
+---
+
+## Robustness
+
+**The broker premium survives within-country comparisons and alternative network thresholds.**
+
+**Country fixed effects (M4).** Adding 43 country dummies to the full specification absorbs all cross-country variation (R² rises from 0.044 to 0.746) — wages are now compared *within* a country across industries. Betweenness centrality remains positive and highly significant: **coefficient 43.455 (SE 13.695, p ≈ 0.002)**. This means industries that broker between supply-chain segments pay more *relative to other industries in the same country*, not just relative to industries in other (richer) countries.
+
+**Threshold robustness.** The main results filter edges below $1M. Rebuilding the network at alternative cutoffs — $500K and $5M — and recomputing betweenness, in-strength and out-strength, the Model 2 specification (`log_wage_usd ~ in-strength + out-strength + betweenness`) gives:
+
+| | $500K cutoff | $5M cutoff |
+|---|---|---|
+| Betweenness centrality | **217.07\*\*\*** (32.69) | **90.49\*\*\*** (17.16) |
+| N | 2,171 | 2,171 |
+
+*Robust SEs (HC1) in parentheses; \*\*\*p<0.001. Full table in `robustness_table.txt`.*
+
+Betweenness remains highly significant (p < 0.001) at both alternative thresholds — the result is not an artefact of the $1M filtering choice.
+
+**Bottom line:** betweenness remains significant within countries (p ≈ 0.002), so the broker premium is not a rich-country artifact.
 
 ---
 

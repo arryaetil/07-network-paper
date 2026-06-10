@@ -17,7 +17,7 @@ library(stargazer)
 library(ggplot2)
 library(scales)
 
-setwd("/Users/arryawillems/07-network-paper")
+setwd("/Users/arryawillems/Desktop/Projects/07-network-paper")
 dir.create("plots", showWarnings = FALSE)
 
 # ---------------------------------------------------------------
@@ -228,6 +228,81 @@ stargazer(m1, m2, m3,
                             "Unit: country-industry pair, 2014.",
                             "ROW and China (missing EMPE) excluded."),
           out = "regression_table.txt")
+
+# ---------------------------------------------------------------
+# (12b) Model 4 — country fixed effects
+m4 <- lm(log_wage_usd ~ str_in_bn + str_out_bn + btw + gvc_back + gvc_fwd + factor(country),
+         data = reg_data)
+se4 <- sqrt(diag(vcovHC(m4, type = "HC1")))
+
+cat("\n--- Model 4: + Country Fixed Effects ---\n")
+m4_ct <- coeftest(m4, vcov = vcovHC(m4, type = "HC1"))
+print(m4_ct[!grepl("factor\\(country\\)", rownames(m4_ct)), ])
+cat("R-squared (M4):", round(summary(m4)$r.squared, 3), "\n")
+
+stargazer(m1, m2, m3, m4,
+          se               = list(se1, se2, se3, se4),
+          type             = "text",
+          title            = "Table 2 — Network Centrality and Log Wages (Cross-Section 2014)",
+          dep.var.labels   = "Log Avg. Wage (USD)",
+          column.labels    = c("Baseline", "Main", "Full", "Country FE"),
+          covariate.labels = c("In-strength (bn USD)",
+                               "Out-strength (bn USD)",
+                               "Betweenness centrality",
+                               "Backward GVC participation",
+                               "Forward GVC participation"),
+          omit             = "factor\\(country\\)",
+          add.lines = list(c("GVC controls", "No", "No", "Yes", "Yes"),
+                            c("Country fixed effects", "No", "No", "No", "Yes")),
+          notes     = paste("Robust SEs (HC1) in parentheses.",
+                            "Unit: country-industry pair, 2014.",
+                            "ROW and China (missing EMPE) excluded."),
+          out = "regression_table.txt")
+
+# ---------------------------------------------------------------
+# (12c) Threshold robustness — rebuild network at $500K and $5M cutoffs
+run_threshold_model <- function(cutoff) {
+  g_th <- delete_edges(g, E(g)[weight <= cutoff])
+
+  str_in_th  <- strength(g_th, mode = "in")
+  str_out_th <- strength(g_th, mode = "out")
+  btw_th     <- betweenness(g_th, directed = TRUE, normalized = TRUE, weights = NA)
+
+  cent_th <- data.frame(
+    node_id    = names(str_in_th),
+    str_in_bn  = as.numeric(str_in_th)  / 1000,
+    str_out_bn = as.numeric(str_out_th) / 1000,
+    btw        = as.numeric(btw_th)
+  )
+
+  th_data <- merge(node_data[, c("node_id", "log_wage_usd")], cent_th, by = "node_id")
+  th_data <- th_data[complete.cases(th_data), ]
+
+  m_th <- lm(log_wage_usd ~ str_in_bn + str_out_bn + btw, data = th_data)
+  list(model = m_th, se = sqrt(diag(vcovHC(m_th, type = "HC1"))))
+}
+
+th_500k <- run_threshold_model(0.5)
+th_5m   <- run_threshold_model(5)
+
+cat("\n--- Threshold Robustness: $500K cutoff ---\n")
+print(coeftest(th_500k$model, vcov = vcovHC(th_500k$model, type = "HC1")))
+cat("\n--- Threshold Robustness: $5M cutoff ---\n")
+print(coeftest(th_5m$model, vcov = vcovHC(th_5m$model, type = "HC1")))
+
+stargazer(th_500k$model, th_5m$model,
+          se               = list(th_500k$se, th_5m$se),
+          type             = "text",
+          title            = "Table 3 — Threshold Robustness (Model 2 Specification)",
+          dep.var.labels   = "Log Avg. Wage (USD)",
+          column.labels    = c("$500K cutoff", "$5M cutoff"),
+          covariate.labels = c("In-strength (bn USD)",
+                               "Out-strength (bn USD)",
+                               "Betweenness centrality"),
+          notes     = paste("Robust SEs (HC1) in parentheses.",
+                            "Network rebuilt with alternative edge-weight thresholds",
+                            "(vs. $1M baseline); centrality recomputed accordingly."),
+          out = "robustness_table.txt")
 
 # ---------------------------------------------------------------
 # (13) Figures for README
