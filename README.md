@@ -128,7 +128,7 @@ Standardised betas confirm that **betweenness centrality has the largest and mos
 
 <img src="plots/07_r2_progression.png" width="580"/>
 
-Each specification adds explanatory power. The low overall R² (4.4%) is expected: 2,171 observations spanning Indonesia and Luxembourg introduce vast unobserved heterogeneity. Country and industry fixed effects are the natural extension for a panel setting.
+Each specification adds explanatory power. The low overall R² (4.4%) is expected: 2,171 observations spanning Indonesia and Luxembourg introduce vast unobserved heterogeneity. Industry fixed effects and a panel setting are the natural extension; country fixed effects are added in M4 (see Robustness).
 
 ---
 
@@ -157,7 +157,7 @@ Betweenness remains highly significant (p < 0.001) at both alternative threshold
 
 **H₀ is rejected. Betweenness centrality significantly predicts higher log wages (p < 0.001), robust across all three specifications.**
 
-1. **Brokers pay more.** A one-standard-deviation increase in betweenness is associated with 0.17 SD higher log wages — the strongest network effect in the model.
+1. **Brokers pay more.** A one-standard-deviation increase in betweenness is associated with 0.08–0.11 SD higher log wages (depending on specification) — the strongest network effect in the model.
 
 2. **The broker premium is not explained by trade volume.** Betweenness remains significant and large after controlling for in- and out-strength, showing the wage premium stems from structural position, not raw trading size.
 
@@ -172,7 +172,7 @@ Betweenness remains highly significant (p < 0.001) at both alternative threshold
 ## Limitations
 
 - **Cross-section (2014 only):** causal inference is limited; network position and wages are jointly determined.
-- **No fixed effects:** unobserved country-level factors (labour institutions, development level) and industry wage premia likely explain much of the remaining variance.
+- **Single cross-section, no industry fixed effects:** country fixed effects are now included (M4), but industry wage premia and time variation remain unmodelled; a panel with node and year fixed effects is the natural extension.
 - **China excluded:** missing EMPE in WIOD 2016 removes 56 observations from the world's largest manufacturing node.
 
 ---
