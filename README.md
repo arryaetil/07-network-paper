@@ -25,8 +25,8 @@ We construct a production network from the World Input-Output Database (WIOD) an
 | File | Source | Variables | Role |
 |---|---|---|---|
 | `WIOT2014_October16_ROW` | WIOD 2016 Release | Bilateral intermediate flows, 44×56 country-industries | Build network; compute centrality & GVC indices |
-| `Socio_Economic_Accounts.xlsx` | WIOD SEA | COMP (compensation), EMPE (employees) | Compute log wage |
-| `Exchange_Rates.xlsx` | WIOD SEA | EXR: USD per unit of local currency | Convert wages to USD |
+| `Socio_Economic_Accounts.xlsx` | WIOD SEA | COMP (compensation), EMPE (employees) | Compute average compensation per employee |
+| `Exchange_Rates.xlsx` | WIOD SEA | EXR: USD per unit of local currency | Convert compensation to USD |
 
 **Sample:** 2,171 country-industry observations (2014 cross-section). ROW excluded (no wage data); China excluded (EMPE missing from WIOD 2016 release).
 
@@ -34,7 +34,7 @@ We construct a production network from the World Input-Output Database (WIOD) an
 
 | Variable | N | Mean | SD | Min | Max |
 |---|---|---|---|---|---|
-| Log Wage (USD) | 2,171 | 3.51 | 0.96 | −1.15 | 6.48 |
+| Log Avg. Compensation per Employee (USD) | 2,171 | 3.51 | 0.96 | −1.15 | 6.48 |
 | In-strength ($M) | 2,171 | 22,471 | 61,218 | 0 | 1,158,375 |
 | Out-strength ($M) | 2,171 | 22,613 | 59,882 | 0 | 975,794 |
 | Betweenness (norm.) | 2,171 | 0.0003 | 0.001 | 0 | 0.011 |
@@ -45,7 +45,7 @@ We construct a production network from the World Input-Output Database (WIOD) an
 
 ## The Production Network
 
-The network is **directed** and **weighted**: nodes are country-industry pairs; a directed edge from *i* to *j* carries the dollar value of intermediate inputs that *i* supplies to *j*. Edges below $1M are filtered (89% of all edges — noise at the 90th percentile).
+The network is **directed** and **weighted**: nodes are country-industry pairs; a directed edge from *i* to *j* carries the dollar value of intermediate inputs that *i* supplies to *j*. Edges below $1M are filtered (89% of all edges — noise at the 90th percentile). In-strength and out-strength use trade values as weights; betweenness centrality is computed on the unweighted directed network, so it captures brokerage position rather than the value of flows along shortest paths.
 
 ### Network-Level Statistics
 
@@ -55,15 +55,15 @@ The network is **directed** and **weighted**: nodes are country-industry pairs; 
 | Edges (filtered) | 553,929 | Significant trade relationships |
 | Density | 9.1% | Sparse — meaningful positional variation |
 | Global clustering | 0.468 | Fairly clustered supply chains |
-| Mean path length | 3.28 hops | Small-world structure |
-| Diameter | 5 hops | Every node reachable in ≤5 steps |
+| Mean path length | 3.28 hops | Short paths among reachable directed pairs |
+| Diameter | 5 hops | Longest shortest path among reachable directed pairs |
 | Degree assortativity | −0.153 | Hub-and-spoke: hubs link to small nodes |
 
 ### Path Length Distribution
 
 <img src="plots/01_path_length_distribution.png" width="700"/>
 
-Most country-industry pairs are 3 hops apart — a compact, small-world topology consistent with densely interconnected global supply chains.
+Most reachable country-industry pairs are 3 hops apart — a compact topology consistent with densely interconnected global supply chains.
 
 ### Top 30 Broker Nodes
 
@@ -79,7 +79,7 @@ Node size scales with betweenness centrality; edge width scales with log trade v
 
 <img src="plots/03_wage_distribution.png" width="720"/>
 
-Log wages are right-skewed within each income group and show clear stratification: high-income country-industries cluster above log wage = 3.5, while lower-middle-income nodes cluster below 2.5.
+Log average compensation is right-skewed within each income group and shows clear stratification: high-income country-industries cluster above log value = 3.5, while lower-middle-income nodes cluster below 2.5.
 
 ### Correlation Matrix
 
@@ -91,13 +91,13 @@ Betweenness has the **highest bivariate correlation with log wages** (r = 0.143)
 
 <img src="plots/04_betweenness_vs_wage.png" width="720"/>
 
-A clear positive gradient: industries occupying broker positions — bridging otherwise unconnected supply chain segments — consistently pay higher wages. This relationship holds across all income groups.
+A clear positive association: industries occupying broker positions — bridging otherwise unconnected supply chain segments — tend to pay higher wages. This relationship is visible across income groups.
 
 ### GVC Participation vs. Log Wage
 
 <img src="plots/05_gvc_vs_wage.png" width="820"/>
 
-Both backward integration (reliance on imported inputs) and forward integration (feeding into others' production) are positively associated with wages, consistent with GVC participation raising productivity and compensation.
+Both backward integration (reliance on imported inputs) and forward integration (feeding into others' production) are positively associated with wages, consistent with the interpretation that GVC participation is linked to higher productivity and compensation.
 
 ---
 
@@ -155,17 +155,17 @@ Betweenness remains highly significant (p < 0.001) at both alternative threshold
 
 ## Conclusions
 
-**H₀ is rejected. Betweenness centrality significantly predicts higher log wages (p < 0.001), robust across all three specifications.**
+**H₀ is rejected. Betweenness centrality is significantly associated with higher log wages (p < 0.001), robust across the three non-FE specifications and still significant with country fixed effects.**
 
 1. **Brokers pay more.** A one-standard-deviation increase in betweenness is associated with 0.08–0.11 SD higher log wages (depending on specification) — the strongest network effect in the model.
 
-2. **The broker premium is not explained by trade volume.** Betweenness remains significant and large after controlling for in- and out-strength, showing the wage premium stems from structural position, not raw trading size.
+2. **The broker premium is not explained by trade volume alone.** Betweenness remains significant and large after controlling for in- and out-strength, suggesting the wage premium is linked to structural position, not just raw trading size.
 
-3. **GVC integration controls do not eliminate the effect.** Adding backward and forward GVC participation (M3) reduces the betweenness coefficient from 163.7 to 119.4 (−27%), but it remains highly significant. Some of the broker premium overlaps with integration depth, but most is independently attributable to network position.
+3. **GVC integration controls do not eliminate the effect.** Adding backward and forward GVC participation (M3) reduces the betweenness coefficient from 163.7 to 119.4 (−27%), but it remains highly significant. Some of the broker premium overlaps with integration depth, but most remains separately associated with network position.
 
-4. **Out-strength, not in-strength, matters.** Industries supplying inputs to others (forward-linked) earn more than industries that merely buy a lot. Selling into supply chains confers more bargaining power than buying from them.
+4. **Out-strength, not in-strength, matters.** Industries supplying inputs to others (forward-linked) earn more than industries that merely buy a lot. A plausible interpretation is that selling into supply chains is linked to stronger bargaining power than buying from them.
 
-5. **GVC integration raises wages.** Both backward and forward participation are positive and significant, consistent with the productivity-enhancing role of global integration documented in the literature (Timmer et al., 2015).
+5. **GVC integration is associated with higher wages.** Both backward and forward participation are positive and significant in M3, consistent with the productivity-enhancing role of global integration documented in the literature (Timmer et al., 2015).
 
 ---
 
